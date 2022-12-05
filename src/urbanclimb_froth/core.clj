@@ -33,14 +33,14 @@
 (defn get-all-branch-statuss []
   (zipmap branches-of-interest (map get-branch-status branches-of-interest)))
 
-(defn format-label [site status]
+(defn format-label [branch status]
   (let [{:keys [status froth]} status]
-    (str (name site) ": " froth " (" status ")")))
+    (str (name branch) ": " froth " (" status ")")))
 
-(defn site-menu-item [site]
-  (let [site-name (key site)
-        status (val site)]
-    (tray/menu-item (format-label site-name status) #(%))))
+(defn branch-menu-item [branch]
+  (let [branch-name (key branch)
+        status (val branch)]
+    (tray/menu-item (format-label branch-name status) #(%))))
 
 (defn get-menu-item [popup-menu index]
   (.getItem popup-menu, index))
@@ -51,7 +51,7 @@
    (range (.getItemCount popup-menu))))
 
 (defn make-tray-icon []
-  (let [menu (apply tray/popup-menu (map site-menu-item (get-all-branch-statuss)))]
+  (let [menu (apply tray/popup-menu (map branch-menu-item (get-all-branch-statuss)))]
     (tray/make-tray-icon! "urban_climb_logo.png" menu)))
 
 (defn -main
@@ -60,15 +60,15 @@
   (let [tray-icon (make-tray-icon)
         popup-menu (.getPopupMenu tray-icon)
         menu-items (get-menu-items popup-menu)
-        menu-item-by-site (zipmap branches-of-interest menu-items)]
+        menu-item-by-branch (zipmap branches-of-interest menu-items)]
     (loop []
       ;; This doesn't need to update very often - every 10 minutes is
       ;; _plenty_. Lets be nice to poor old urban climb.
       (Thread/sleep (* 10 1000))
       (let [statuss (get-all-branch-statuss)]
-        (doseq [[site menu-item] menu-item-by-site]
-          (let [status (site statuss)
-                label (format-label site status)]
+        (doseq [[branch menu-item] menu-item-by-branch]
+          (let [status (branch statuss)
+                label (format-label branch status)]
             (.setLabel menu-item label))
-          menu-item-by-site))
+          menu-item-by-branch))
       (recur))))

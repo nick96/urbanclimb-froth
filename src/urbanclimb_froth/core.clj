@@ -17,7 +17,12 @@
 (def ^:private occupancy-url
   "https://portal.urbanclimb.com.au/uc-services/ajax/gym/occupancy.ashx")
 
-(defn get-branch-status [branch]
+(defn get-branch-status
+  "Get the status of a given branch, named by keyword.
+
+  The keyword should be one of collingwood, west-end, newstead,
+  milton, townsville or blackburn."
+  [branch]
   (if-let [branch-uuid (branch branch-uuids)]
     (let [response (client/get occupancy-url
                                {:accept :json :query-params {"branch" branch-uuid} :as :json})
@@ -30,33 +35,42 @@
     (throw (ex-info "Unknown branch, must be a keyword :collingwood"
                     {:unknown-branch branch}))))
 
-(defn get-all-branch-statuss []
+(defn get-all-branch-statuss
+  "Get the status' of all the branches of interest
+
+  The result will be a map mapping the branch name keyword to its
+  status."
+  []
   (zipmap branches-of-interest (map get-branch-status branches-of-interest)))
 
-(defn format-label [branch status]
+(defn format-label
+  "Format the label for a menu item based on the branch and status."
+  [branch status]
   (let [{:keys [status froth]} status]
     (str (name branch) ": " froth " (" status ")")))
 
-(defn branch-menu-item [branch]
+(defn branch-menu-item
+  "Construct a menu item for the given branch.
+
+  `branch` should be a key value pair of the branch name and the
+  status map."
+  [branch]
   (let [branch-name (key branch)
         status (val branch)]
     (tray/menu-item (format-label branch-name status) #(%))))
 
-(defn get-menu-item [popup-menu index]
-  (.getItem popup-menu, index))
+(defn get-menu-items
+  "Get all the menu items in the given popup menu."
+  [popup-menu]
+  (map #(.getItem popup-menu, %) (range (.getItemCount popup-menu))))
 
-(defn get-menu-items [popup-menu]
-  (map
-   #(get-menu-item popup-menu %)
-   (range (.getItemCount popup-menu))))
-
-(defn make-tray-icon []
+(defn make-tray-icon
+  "Construct a tray icon."
+  []
   (let [menu (apply tray/popup-menu (map branch-menu-item (get-all-branch-statuss)))]
     (tray/make-tray-icon! "urban_climb_logo.png" menu)))
 
-(defn -main
-  "I don't do a whole lot ... yet."
-  [& _]
+(defn -main [& _]
   (let [tray-icon (make-tray-icon)
         popup-menu (.getPopupMenu tray-icon)
         menu-items (get-menu-items popup-menu)

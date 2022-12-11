@@ -68,7 +68,7 @@
   "Construct a tray icon."
   []
   (let [menu (apply tray/popup-menu (map branch-menu-item (get-all-branch-statuss)))]
-    (tray/make-tray-icon! "urban_climb_logo.png" menu)))
+    (tray/make-tray-icon! "resources/urban_climb_logo.png" menu)))
 
 (defn -main [& _]
   (let [tray-icon (make-tray-icon)

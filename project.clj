@@ -7,7 +7,7 @@
                  [clj-systemtray "0.2.1"]
                  [clj-http "3.12.3"]
                  [cheshire "5.11.0"]]
-  :main ^:skip-aot urbanclimb-froth.core
+  :main urbanclimb-froth.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all
                        :jvm-opts ["-Dclojure.compiler.direct-linking=true"]}})
